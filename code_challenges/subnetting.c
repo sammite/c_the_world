@@ -23,29 +23,26 @@ unsigned char getOctet(unsigned char inOctet, int mask) {
 unsigned char getMasked(unsigned char inOctet, int mask) {
     return inOctet & mask;
 }
+unsigned char getHostBits(unsigned char inOctet, int mask) {
+    return inOctet & ~mask;
+}
 void printSubnet(char *ipAddr, int cidr) {
     int test_cidr = cidr;
+    int host_cidr = cidr;
     unsigned char octets[4];
     unsigned char byteVal;
     unsigned char octetMask;
+    
+    unsigned char hostMask;
     int sentinel = 0;
     char *token = strtok(ipAddr, ".");
     while( NULL != token) {
         unsigned char byteVal = (unsigned char)atoi(token);
         octets[sentinel] = byteVal;
         sentinel++;
-        //printf("%d ", byteVal);
         token = strtok(NULL, ".");
     }
     
-        
-   // for (int i = 0; i < 4; i++) {
-   //     
-   //     printf("%d", octets[i]);
-   //     if(3 > i) {
-   //         printf(".");
-   //     }
-   // }
     // print the subnet id
     printf("\n");
     for (int i = 0; i < 4; i++) {
@@ -91,13 +88,34 @@ void printSubnet(char *ipAddr, int cidr) {
         
     }
     printf("\n");
+    
+    // print the host id
+    for (int i = 0; i < 4; i++) {
+        if (host_cidr >= 8) {
+            printf("0");
+            host_cidr -=8;
+        }
+        else if (0 == host_cidr) {
+            printf("%d", octets[i]);
+        } else {
+            hostMask = getOctet(255, 8 - host_cidr);
+            printf("%d", getHostBits(octets[i], hostMask));
+            host_cidr -= host_cidr;
+        }
+        if (3 > i) {
+            printf(".");
+        }
+        
+    }
+    printf("\n");
+    
      
 }
 
 int main()
 {
-    char ipAddr[16] = "192.168.192.129";
-    int cidr = 31;
+    char ipAddr[16] = "192.168.192.141";
+    int cidr = 30;
     printf("%s/%d\n", ipAddr, cidr);
     printSubnet(ipAddr, cidr); 
      
